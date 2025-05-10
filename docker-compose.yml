@@ -1,0 +1,38 @@
+services:
+  api-event-mgmt-app:
+    build:
+      context: .  # Now in the root folder, use current directory context
+      dockerfile: Dockerfile  # Path to the Dockerfile
+    container_name: api-event-mgmt-app
+    ports:
+      - "8000:8000"  # FastAPI port
+      - "5678:5678"  # Expose port for debugging (optional)
+    volumes:
+      - ./app:/app/app  # Mount app folder correctly (relative to docker-compose location)
+      - ./requirements.txt:/app/requirements.txt  # Mount requirements file correctly
+    depends_on:
+      - postgres  # Wait for PostgreSQL service to be up before starting the app
+    networks:
+      - mynetwork  # Connect to the custom network
+
+
+  postgres:
+    image: postgres:13  # Use the official PostgreSQL 13 image
+    container_name: postgres
+    environment:
+      POSTGRES_PASSWORD: password  # Set the password for the default PostgreSQL user
+      POSTGRES_DB: mydb  # Create a database named 'mydb'
+      POSTGRES_USER: postgres  # Default user is 'postgres'
+    ports:
+      - "5432:5432"  # Expose PostgreSQL port
+    volumes:
+      - postgres_data:/var/lib/postgresql/data  # Persist PostgreSQL data across container restarts
+    networks:
+      - mynetwork  # Connect to the custom network
+
+volumes:
+  postgres_data:  # Named volume to persist PostgreSQL data
+
+# Define the network
+networks:
+  mynetwork:  # Custom network for communication between services
